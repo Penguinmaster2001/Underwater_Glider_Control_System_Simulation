@@ -60,7 +60,7 @@
 
         "buoyancy_engine": {
 
-            "tank_volume": 0.003,
+            "tank_volume": 0.0015,
             "initial_proportion_full": 1.0,
             "initial_pump_rate": 0.0,
             "max_pump_rate": 0.1,
@@ -77,9 +77,8 @@
 
             "reference_area": 0.025,
             "lift_multiplier": 1.0,
-            "lift_curve_slope": 10.0,
-            "stall_angle": 0.17,
-            "drag_multiplier": 1.0,
+            "lift_coefficient_values": "",
+            "drag_coefficient_values": "",
             "position": {
                 "x": -0.5,
                 "y": 0.0,

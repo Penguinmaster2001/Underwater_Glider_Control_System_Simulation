@@ -284,6 +284,21 @@ class Vector:
 
         return f"Vector({self.vec[0]}, {self.vec[1]}, {self.vec[2]})"
 
+
+
+
+
+class interpolator:
+
+    def __init__(self, inputs: list, outputs: list) -> None:
+
+        self.inputs: np.ndarray = np.array(inputs)
+        self.outputs: np.ndarray = np.array(outputs)
+
+    
+    def interpolate(self, val: float) -> float:
+
+        return float(np.interp(x = val, xp = self.inputs, fp = self.outputs, period = np.pi))
     
 
 
