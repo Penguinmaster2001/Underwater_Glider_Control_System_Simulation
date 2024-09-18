@@ -1,8 +1,21 @@
 
+import sys
+import json
 import numpy as np
 
 
+'''
+This is a utilities library for the simulation.
+It has more than just math
+
+# TODO: Rename this module to SimUtils or something
+'''
+
+
 pi = np.pi
+
+deg_to_rad = pi / 180.0
+rad_to_deg = 180.0 / pi
 
 
 
@@ -457,3 +470,35 @@ def sign(val: int | float) -> int:
         return 0
     
     return -1
+
+
+
+def load_config() -> dict:
+    """
+    Load a configuration file and return the configuration as a dictionary.
+
+    Args:
+        file_path (str): The path to the configuration file.
+
+    Returns:
+        dict: The configuration loaded from the file.
+    """
+
+    config_path = None
+    for arg in sys.argv:
+        if arg.endswith(".json"):
+            config_path = arg
+
+    if config_path is None:
+        print(f"Usage: {" ".join(sys.argv)} /path/to/config.json")
+
+        while config_path is None:
+            arg = input("Please enter config path: ")
+
+            if arg.endswith(".json"):
+                config_path = arg
+    
+    with open(config_path, 'r') as file:
+        config = json.load(file)
+    
+    return config

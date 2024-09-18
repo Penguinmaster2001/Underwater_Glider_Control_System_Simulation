@@ -77,8 +77,7 @@
 
             "reference_area": 0.025,
             "lift_multiplier": 1.0,
-            "lift_coefficient_values": "",
-            "drag_coefficient_values": "",
+            "data_path": "wing_data.json",
             "position": {
                 "x": -0.5,
                 "y": 0.0,

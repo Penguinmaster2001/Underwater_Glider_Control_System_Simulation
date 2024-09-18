@@ -5,35 +5,10 @@ import numpy as np
 
 import csv
 
-import json
-
-import sys
-
 import Glider
 import ControlSystem
 import SimMath
 from SimMath import Vector
-
-
-
-
-
-    
-def load_config(file_path: str) -> dict:
-    """
-    Load a configuration file and return the configuration as a dictionary.
-
-    Args:
-        file_path (str): The path to the configuration file.
-
-    Returns:
-        dict: The configuration loaded from the file.
-    """
-    
-    with open(file_path, 'r') as file:
-        config = json.load(file)
-    
-    return config
 
 
 
@@ -58,23 +33,7 @@ def do_sim() -> None:
         None
     """
 
-    # Get the config path
-    config_path = None
-    for arg in sys.argv:
-        if arg.endswith(".json"):
-            config_path = arg
-
-    if config_path is None:
-        print(f"Usage: {"".join(sys.argv)} /path/to/config.json")
-
-        while config_path is None:
-            arg = input("Please enter config path: ")
-
-            if arg.endswith(".json"):
-                config_path = arg
-
-    
-    config = load_config(config_path)
+    config = SimMath.load_config()
 
     glider_config = config["glider"]
 
