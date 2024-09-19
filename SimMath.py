@@ -25,6 +25,16 @@ class Vector:
 
     Wrapper around a numpy.ndarray
 
+    World
+    Positive x is East
+    Positive y is North
+    Positive z is Up
+
+    Glider
+    Positive x is Forward
+    Positive y is Left
+    Positive z is Up
+
     Attributes:
         vec (numpy.ndarray): A numpy array representing the vector's coordinates in x, y, and z directions.
 
@@ -196,9 +206,23 @@ class Vector:
             Vector: A new Vector instance representing the cross product of the two vectors.
         """
 
-
         cross_product = np.cross(self.vec, other.vec)
         return Vector(cross_product[0], cross_product[1], cross_product[2])
+    
+
+
+    def project(self, other: 'Vector') -> 'Vector':
+        """
+        Computes the projection of this vector onto another vector.
+
+        Args:
+            other (Vector): The vector to project onto.
+
+        Returns:
+            Vector: A new Vector instance representing the projection.
+        """
+
+        return other * (self.dot(other) / other.dot(other))
     
 
 
@@ -300,18 +324,20 @@ class Vector:
 
 
 
+def ping_pong(value: float, min_val: float, max_val: float) -> float:
 
-class interpolator:
+    range_size = max_val - min_val
+    if range_size == 0:
+        return min_val
 
-    def __init__(self, inputs: list, outputs: list) -> None:
-
-        self.inputs: np.ndarray = np.array(inputs)
-        self.outputs: np.ndarray = np.array(outputs)
-
+    value = (value - min_val) % (2.0 * range_size)
+    if value < 0:
+        value += 2 * range_size
     
-    def interpolate(self, val: float) -> float:
+    if value > range_size:
+        value = 2 * range_size - value
 
-        return float(np.interp(x = val, xp = self.inputs, fp = self.outputs, period = np.pi))
+    return value + min_val
     
 
 
@@ -412,7 +438,6 @@ def clamp(val: float, min: float, max: float) -> float:
 
     Returns:
         float: The clamped value.
-
     """
 
     if val > max:
@@ -438,7 +463,6 @@ def clamp_mag(val: float, max_mag: float) -> float:
 
     Returns:
         float: The clamped value.
-
     """
     
     if val > max_mag:
@@ -463,6 +487,7 @@ def sign(val: int | float) -> int:
     Returns:
         int: 1 if the value is positive, 0 if the value is zero, -1 if the value is negative.
     """
+
     if val > 0:
         return 1
     

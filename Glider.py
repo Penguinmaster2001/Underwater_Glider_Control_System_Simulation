@@ -9,6 +9,8 @@ from SimMath import Vector
 
 import Inlet
 
+from LiftCoefExtrapolation import WingSampler
+
 import numpy as np
 
 
@@ -212,7 +214,7 @@ class BuoyancyEngine(GliderComponent):
 class Hydrofoil(GliderComponent):
 
     def __init__(self, reference_area: float, lift_multiplier: float,
-                 lift_curve_slope: float, stall_angle: float,
+                 data_path: str,
                  position: dict,
                  drag_multiplier: float, mass: float) -> None:
         
@@ -220,9 +222,7 @@ class Hydrofoil(GliderComponent):
 
         self.lift_multiplier: float = lift_multiplier
 
-        self.lift_curve_slope: float = lift_curve_slope
-
-        self.stall_angle: float = stall_angle
+        self.wing_sampler: WingSampler = WingSampler(data_path)
 
         self._position: Vector = Vector(**position)
         self._mass: float = mass
@@ -256,42 +256,27 @@ class Hydrofoil(GliderComponent):
         # Calculate drag in each direction
         # The glider's top and side are the same
         # The sign term is important because squaring the velocity removes direction
-        front_drag = SimMath.sign(local_flow.x()) * self.front_area * self.front_drag_coefficient * (local_flow.x() ** 2)
-        side_drag = SimMath.sign(local_flow.y()) * self.side_area * self.side_drag_coefficient * (local_flow.y() ** 2)
-        top_drag = SimMath.sign(local_flow.z()) * self.side_area * self.side_drag_coefficient * (local_flow.z() ** 2)
+        # front_drag = SimMath.sign(local_flow.x()) * self.front_area * self.front_drag_coefficient * (local_flow.x() ** 2)
+        # side_drag = SimMath.sign(local_flow.y()) * self.side_area * self.side_drag_coefficient * (local_flow.y() ** 2)
+        # top_drag = SimMath.sign(local_flow.z()) * self.side_area * self.side_drag_coefficient * (local_flow.z() ** 2)
 
-        # Drag equation
-        local_drag = Vector(front_drag, side_drag, top_drag) * (0.5 * Inlet.density)
+        dynamic_pressure = 0.5 * Inlet.density * local_flow.dot(local_flow)
+        angle_of_attack = np.arctan2(local_flow.z(), -local_flow.x())
+        drag_coefficient = self.wing_sampler.sample_drag_coefficient(angle_of_attack)
+        drag_magnitude = drag_coefficient * dynamic_pressure * self.reference_area
+        local_drag = Vector(-np.cos(angle_of_attack) * drag_magnitude, 0.0, -np.sin(angle_of_attack) * drag_magnitude)
         
         return local_drag * self.drag_multiplier
-
-    
-
-    def compute_lift_coefficient(self, angle_of_attack: float) -> float:
-
-        lift_coefficient = 0.0
-
-        angle = abs(angle_of_attack)
-
-        if angle < self.stall_angle:
-            lift_coefficient = self.lift_curve_slope * angle
-        
-        elif angle < 0.7854: # pi / 4
-            lift_coefficient = SimMath.lerp(self.lift_curve_slope * self.stall_angle, 0.0, angle - self.stall_angle)
-        
-        return SimMath.sign(angle_of_attack) * lift_coefficient
     
 
 
     def compute_lift_force(self, local_flow: Vector) -> Vector:
 
         dynamic_pressure = 0.5 * Inlet.density * local_flow.dot(local_flow)
-
         angle_of_attack = np.arctan2(local_flow.z(), -local_flow.x())
-
-        lift_coefficient = self.compute_lift_coefficient(angle_of_attack)
-
-        local_lift = Vector(z = lift_coefficient * dynamic_pressure * self.reference_area)
+        lift_coefficient = self.wing_sampler.sample_lift_coefficient(angle_of_attack)
+        lift_magnitude = lift_coefficient * dynamic_pressure * self.reference_area
+        local_lift = Vector(-np.sin(angle_of_attack) * lift_magnitude, 0.0, np.cos(angle_of_attack) * lift_magnitude)
 
         return local_lift * self.lift_multiplier
 
@@ -494,6 +479,10 @@ class Glider:
         
         self.angular_velocity += self.angular_acceleration * time_step
         self.orientation = (self.orientation + (self.angular_velocity * time_step)).loop(-SimMath.pi, SimMath.pi)
+
+        # Uncomment for wing demonstration
+        # self.orientation.x(SimMath.sign(self.velocity.z()) * 0.10 * np.pi)
+        # self.orientation.y(SimMath.sign(self.velocity.z()) * 0.25 * np.pi)
 
 
     

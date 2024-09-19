@@ -17,12 +17,38 @@ coefficients_of_drag: np.ndarray
 
 
 
-def sample_angle(angle: float) -> tuple[float, float]:
-    global coefficients_of_lift, coefficients_of_drag
+class WingSampler:
 
-    angle %= 2.0 * np.pi
+    def __init__(self, data_path: str) -> None:
 
-    return (0.0, 0.0)
+        with open(data_path, 'r') as file:
+            wing_data = json.load(file)
+
+        angles = np.array([angle * SimMath.deg_to_rad for angle in reversed(wing_data["angles"])])
+        lift_coefs = np.array([c for c in reversed(wing_data["coefficients_of_lift"])])
+        drag_coefs = np.array([c for c in reversed(wing_data["coefficients_of_drag"])])
+
+        self.lift_interp = CubicSpline(angles, lift_coefs)
+        self.drag_interp = CubicSpline(angles, drag_coefs)
+
+
+
+    def sample_lift_coefficient(self, angle_of_attack: float) -> float:
+
+        direction = 1 if (angle_of_attack % np.pi) < (0.5 * np.pi) else -1
+
+        angle_of_attack = SimMath.ping_pong(angle_of_attack, 0.0, 0.5 * np.pi)
+
+        return direction * self.lift_interp(angle_of_attack)
+
+
+
+    def sample_drag_coefficient(self, angle_of_attack: float) -> float:
+
+        angle_of_attack = SimMath.ping_pong(angle_of_attack, 0.0, 0.5 * np.pi)
+
+        return self.lift_interp(angle_of_attack)
+
 
 
 
