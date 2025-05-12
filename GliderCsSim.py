@@ -65,7 +65,7 @@ def do_sim() -> None:
             config_path = arg
 
     if config_path is None:
-        print(f"Usage: {"".join(sys.argv)} /path/to/config.json")
+        print(f"Usage: {''.join(sys.argv)} /path/to/config.json")
 
         while config_path is None:
             arg = input("Please enter config path: ")
@@ -130,7 +130,7 @@ def do_sim() -> None:
     # Export glider_log to CSV
     with open('animation/glider_log.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['time', 'position_x', 'position_y', 'position_z', "velocity", "acceleration", "tank", 'roll', 'pitch', 'yaw'])
+        writer.writerow(['time', 'position_x', 'position_y', 'position_z', "velocity", "acceleration", "tank*1e1", 'roll', 'pitch', 'yaw'])
         for row in glider_log_downsampled:
             writer.writerow(row)
 
@@ -185,7 +185,7 @@ def do_sim() -> None:
     axs[0].plot(glider_time, glider_pitch, label="pitch")
     axs[0].plot(glider_time, glider_yaw, label="yaw")
 
-    axs[1].plot(glider_time, glider_tank, label = "tank")
+    axs[1].plot(glider_time, glider_tank, label = "tank*1e1")
     
     axs[1].set_ylabel("Z Component")
     axs[1].legend(loc="lower left")

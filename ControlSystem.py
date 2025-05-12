@@ -265,13 +265,14 @@ class ControlSystem:
         self.logger.glider_log.append([time,
                                        position.x(), position.y(), position.z(),
                                        velocity, acceleration,
-                                       (tank - 1) * 10] + other_to_log)
+                                       tank * 10] + other_to_log)
 
         if time < self.prev_update_time + self.period:
             return self.prev_command
 
         self.prev_update_time = time
 
+        """
         # Swap states when needed
         # TODO: There needs to be a better way to do this (the state machine should do it with a single method call)
         if self.state_machine.state == diving:
@@ -282,6 +283,7 @@ class ControlSystem:
             if position.z() >= self.target_depth:
                 self.target_depth = self.max_depth
                 self.state_machine.next()
+        """
 
         # depth -> v_vel -> v_acc
         pid_depth_output = self.pid_depth.update(self.target_depth, position.z(), time)

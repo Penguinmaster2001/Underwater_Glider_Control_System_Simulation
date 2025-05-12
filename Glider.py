@@ -493,7 +493,16 @@ class Glider:
                                            total_torque.z() / moment.z())
         
         self.angular_velocity += self.angular_acceleration * time_step
+
+        ### HARD CODE TO KEEP PITCH AT ZERO
+        #  Keep pitch at zero
+        self.orientation.y(0.0)
+        self.angular_velocity.y(0.0)
+        self.angular_acceleration.y(0.0)
+
         self.orientation = (self.orientation + (self.angular_velocity * time_step)).loop(-SimMath.pi, SimMath.pi)
+
+
 
 
     
